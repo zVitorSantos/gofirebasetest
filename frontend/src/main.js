@@ -4,16 +4,15 @@ import App from './App.vue';
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import dotenv from 'dotenv';
+import path from 'path';
 
-// Carregar as variáveis de ambiente do arquivo .env
-dotenv.config();
+// Construa o caminho absoluto até o arquivo .env
+const envPath = path.resolve(__dirname, '../.env');
 
-// Carrega variáveis de ambiente apenas em ambiente de desenvolvimento
-if (import.meta.env.MODE === 'development') {
-    require('dotenv').config(); // Carrega variáveis de ambiente do arquivo .env
-  }
+// Carregue as variáveis de ambiente do arquivo .env
+dotenv.config({ path: envPath });
 
-// Your web app's Firebase configuration
+// Sua configuração do Firebase usando variáveis de ambiente
 const firebaseConfig = {
     apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
     authDomain: process.env.VUE_APP_FIREBASE_AUTH_DOMAIN,
@@ -24,8 +23,9 @@ const firebaseConfig = {
     measurementId: process.env.VUE_APP_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
+// Inicialize o Firebase com as configurações definidas acima
 const firebaseApp = initializeApp(firebaseConfig);
 const analytics = getAnalytics(firebaseApp);
 
+// Monte o aplicativo Vue.js
 createApp(App).mount('#app');
