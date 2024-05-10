@@ -1,12 +1,9 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import dotenv from 'dotenv';
 
-// https://vitejs.dev/config/
+dotenv.config(); // Carrega variáveis de ambiente do arquivo .env
+
 export default defineConfig({
   plugins: [vue()],
-  build: {
-    rollupOptions: {
-      external: ['dotenv'], 
-    }
-  }
-})
+});
