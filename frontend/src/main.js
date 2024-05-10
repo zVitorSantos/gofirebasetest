@@ -8,6 +8,11 @@ import dotenv from 'dotenv';
 // Carregar as variáveis de ambiente do arquivo .env
 dotenv.config();
 
+// Carrega variáveis de ambiente apenas em ambiente de desenvolvimento
+if (import.meta.env.MODE === 'development') {
+    require('dotenv').config(); // Carrega variáveis de ambiente do arquivo .env
+  }
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
