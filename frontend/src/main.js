@@ -1,8 +1,10 @@
 import { createApp } from 'vue';
 import './style.css';
-import App from './App.vue';
+import App from './App.vue'
+import router from './router'
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
+import AuthService from './services/AuthService';
 
 // Sua configuração do Firebase usando variáveis de ambiente do Vite
 const firebaseConfig = {
@@ -18,8 +20,11 @@ const firebaseConfig = {
 // Inicialize o Firebase com as configurações definidas acima
 const firebaseApp = initializeApp(firebaseConfig);
 
+// Crie uma instância da classe AuthService
+export const authService = new AuthService(firebaseApp);
+
 // Se deseja usar o Firebase Analytics
 const analytics = getAnalytics(firebaseApp);
 
 // Monte o aplicativo Vue.js
-createApp(App).mount('#app');
+createApp(App).use(router).mount('#app');
