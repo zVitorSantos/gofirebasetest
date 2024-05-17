@@ -1,26 +1,36 @@
 <template>
-  <div class="home">
-    <h1>Bem-vindo à nossa aplicação!</h1>
-    <button @click="goToLoginPage">Login</button>
+  <div>
+    <div v-if="isAuthenticated">
+      <AuthenticatedHome />
+    </div>
+    <div v-else>
+      <UnauthenticatedHome />
+    </div>
   </div>
 </template>
 
-<script setup>
-import { useRouter } from 'vue-router';
+<script>
+import { computed, watch } from 'vue';
+import { useStore } from 'vuex';
+import AuthenticatedHome from '../components/home/AuthenticatedHome.vue';
+import UnauthenticatedHome from '../components/home/UnauthenticatedHome.vue';
 
-const router = useRouter();
+export default {
+  components: {
+    AuthenticatedHome,
+    UnauthenticatedHome
+  },
+  setup() {
+    const store = useStore();
+    const isAuthenticated = computed(() => store.getters['auth/isAuthenticated']);
 
-const goToLoginPage = () => {
-  router.push('/login');
+    watch(isAuthenticated, (newValue) => {
+      console.log('Authentication state changed:', newValue);
+    });
+
+    return {
+      isAuthenticated
+    };
+  }
 };
 </script>
-
-<style scoped>
-.home {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-</style>

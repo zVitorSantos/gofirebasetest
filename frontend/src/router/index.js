@@ -1,11 +1,11 @@
 // src/router/index.js
 
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Login from '../views/Login.vue'
-// import Catalog from '../views/Catalog.vue'
-// import Quote from '../views/Quote.vue'
-// import Orders from '../views/Orders.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import Home from '../views/Home.vue';
+import Login from '../views/Login.vue';
+import Register from '../views/Register.vue';
+// import PrivateComponent from '../views/PrivateComponent.vue'; 
+import store from '../store'; 
 
 const routes = [
   {
@@ -18,27 +18,34 @@ const routes = [
     name: 'Login',
     component: Login
   },
-//   {
-//     path: '/catalog',
-//     name: 'Catalog',
-//     component: Catalog
-//   },
-//   {
-//     path: '/quote',
-//     name: 'Quote',
-//     component: Quote
-//   },
-//   {
-//     path: '/orders',
-//     name: 'Orders',
-//     component: Orders
-//   },
-  // outras rotas vão aqui
-]
+  {
+    path: '/register',
+    name: 'Register',
+    component: Register
+  },
+  // {
+  //   path: '/private',
+  //   name: 'PrivateComponent',
+  //   component: PrivateComponent,
+  //   meta: { requiresAuth: true }
+  // }
+];
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.VITE_BASE_URL),
+  history: createWebHistory(import.meta.env.VITE_BASE_URL),
   routes
-})
+});
 
-export default router
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!store.getters['auth/isAuthenticated']) {
+      next('/login');
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
+});
+
+export default router;

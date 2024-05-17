@@ -40,7 +40,6 @@ export default {
     const registerWithEmail = async () => {
       try {
         await authService.register(email.value, password.value); 
-        // Redirect to home page or dashboard
       } catch (error) {
         console.error(error);
       }
