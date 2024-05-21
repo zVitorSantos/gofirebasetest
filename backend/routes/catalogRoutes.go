@@ -11,5 +11,4 @@ func RegisterCatalogRoutes(r *gin.Engine, db *firestore.Client) {
 
 	r.POST("/catalog", catalogController.CreateProduct)
 	r.GET("/catalog", catalogController.GetProducts)
-	// Similar routes for UpdateProduct and DeleteProduct can be registered here
 }
