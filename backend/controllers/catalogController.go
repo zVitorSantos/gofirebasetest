@@ -38,7 +38,7 @@ func (cc *CatalogController) CreateProduct(ctx *gin.Context) {
 		Descricao:    request.Descricao,
 		Tipo:         request.Tipo,
 		Modelo:       request.Modelo,
-		Formato:      request.Descricao,
+		Formato:      request.Formato,
 		Complementos: request.Complementos,
 		Material:     request.Material,
 		Peso:         request.Peso,
@@ -66,4 +66,48 @@ func (cc *CatalogController) GetProducts(ctx *gin.Context) {
 		return
 	}
 	utils.SendSuccess(ctx, "Products fetched successfully", products)
+}
+
+func (cc *CatalogController) GetProductByID(ctx *gin.Context) {
+	id := ctx.Param("id")
+	product, err := cc.service.GetProductByID(id)
+	if err != nil {
+		utils.SendError(ctx, http.StatusInternalServerError, "Error fetching product")
+		return
+	}
+	if product == nil {
+		utils.SendError(ctx, http.StatusNotFound, "Product not found")
+		return
+	}
+	utils.SendSuccess(ctx, "Product fetched successfully", product)
+}
+
+func (cc *CatalogController) UpdateProduct(ctx *gin.Context) {
+	id := ctx.Param("id")
+	var request models.UpdateProductRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		utils.SendError(ctx, http.StatusBadRequest, "Invalid request")
+		return
+	}
+
+	if err := request.Validate(); err != nil {
+		utils.SendError(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := cc.service.UpdateProduct(id, &request); err != nil {
+		utils.SendError(ctx, http.StatusInternalServerError, "Error updating product")
+		return
+	}
+
+	utils.SendSuccess(ctx, "Product updated successfully", nil)
+}
+
+func (cc *CatalogController) DeleteProduct(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if err := cc.service.DeleteProduct(id); err != nil {
+		utils.SendError(ctx, http.StatusInternalServerError, "Error deleting product")
+		return
+	}
+	utils.SendSuccess(ctx, "Product deleted successfully", nil)
 }

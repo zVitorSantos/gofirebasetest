@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/Home.vue';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
-// import PrivateComponent from '../views/PrivateComponent.vue'; 
+import Catalog from '../views/Catalog.vue'; 
 import store from '../store'; 
 
 const routes = [
@@ -23,12 +23,11 @@ const routes = [
     name: 'Register',
     component: Register
   },
-  // {
-  //   path: '/private',
-  //   name: 'PrivateComponent',
-  //   component: PrivateComponent,
-  //   meta: { requiresAuth: true }
-  // }
+  {
+    path: '/catalog',
+    name: 'Catalog',
+    component: Catalog,
+  }
 ];
 
 const router = createRouter({

@@ -47,3 +47,28 @@ func (r *CreateProductRequest) Validate() error {
 	}
 	return nil
 }
+
+type UpdateProductRequest struct {
+	Imagem       *string  `json:"imagem"`
+	Descricao    *string  `json:"descricao"`
+	Tipo         *string  `json:"tipo"`
+	Modelo       *string  `json:"modelo"`
+	Formato      *string  `json:"formato"`
+	Complementos *string  `json:"complementos"`
+	Material     *string  `json:"material"`
+	Peso         *float64 `json:"peso"`
+	Altura       *float64 `json:"altura"`
+	Largura      *float64 `json:"largura"`
+	Comprimento  *float64 `json:"comprimento"`
+	Valor        *float64 `json:"valor"`
+	Matriz       *string  `json:"matriz"`
+	Piloto       *string  `json:"piloto"`
+	Desenho      *string  `json:"desenho"`
+}
+
+func (r *UpdateProductRequest) Validate() error {
+	if r.Imagem == nil && r.Descricao == nil && r.Tipo == nil && r.Modelo == nil && r.Formato == nil && r.Peso == nil && r.Altura == nil && r.Largura == nil && r.Comprimento == nil && r.Valor == nil && r.Matriz == nil && r.Piloto == nil && r.Desenho == nil {
+		return errors.New("no fields to update")
+	}
+	return nil
+}

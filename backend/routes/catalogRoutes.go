@@ -6,9 +6,12 @@ import (
 	"github.com/zVitorSantos/gofirebasetest.git/controllers"
 )
 
-func RegisterCatalogRoutes(r *gin.Engine, db *firestore.Client) {
+func RegisterCatalogRoutes(r *gin.RouterGroup, db *firestore.Client) {
 	catalogController := controllers.NewCatalogController(db)
 
 	r.POST("/catalog", catalogController.CreateProduct)
 	r.GET("/catalog", catalogController.GetProducts)
+	r.GET("/catalog/:id", catalogController.GetProductByID)
+	r.PUT("/catalog/:id", catalogController.UpdateProduct)
+	r.DELETE("/catalog/:id", catalogController.DeleteProduct)
 }

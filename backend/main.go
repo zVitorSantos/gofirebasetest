@@ -7,10 +7,20 @@ import (
 )
 
 func main() {
+	// Configura o Firestore usando a função InitFirestore
+	client := utils.InitFirestore()
+	defer client.Close()
+
+	// Configura o Gin
 	r := gin.Default()
-	db := utils.InitFirestore()
 
-	routes.RegisterCatalogRoutes(r, db)
+	// Define o grupo de rotas com o prefixo /api/v1
+	api := r.Group("/api/v1")
+	{
+		routes.RegisterCatalogRoutes(api, client)
+		routes.RegisterUserRoutes(api, client)
+	}
 
-	r.Run()
+	// Inicia o servidor
+	r.Run(":8080")
 }
