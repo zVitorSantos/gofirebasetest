@@ -7,6 +7,10 @@
           <div class="card-body">
             <form @submit.prevent="registerWithEmail">
               <div class="form-group">
+              <label for="name">Name:</label>
+              <input type="text" id="name" v-model="name" required class="form-control">
+            </div>
+              <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" v-model="email" required class="form-control">
               </div>
@@ -31,21 +35,29 @@
 <script>
 import { ref } from 'vue';
 import { authService } from '../../main';
+import axios from 'axios';
 
 export default {
   setup() {
     const email = ref('');
     const password = ref('');
+    const name = ref(''); // Add this line
 
     const registerWithEmail = async () => {
       try {
-        await authService.register(email.value, password.value); 
+        await authService.register(email.value, password.value);
+        await axios.post('/api/v1/user', {
+          email: email.value,
+          password: password.value,
+          name: name.value,
+          role: 'defaultRole'
+        });
       } catch (error) {
         console.error(error);
       }
     };
 
-    return { email, password, registerWithEmail };
+    return { email, password, name, registerWithEmail }; 
   }
 };
 </script>

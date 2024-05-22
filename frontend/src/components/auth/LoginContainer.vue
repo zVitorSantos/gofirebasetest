@@ -41,6 +41,8 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { authService } from '../../main';
 import { GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
+import axios from 'axios';
+axios.defaults.baseURL = 'http://localhost:8080';
 
 export default {
   setup() {
@@ -52,7 +54,12 @@ export default {
     const loginWithEmail = async () => {
       try {
         await authService.login(email.value, password.value);
-        // Não redirecione o usuário imediatamente após o login
+        await axios.post('/api/v1/user', {
+          email: email.value,
+          password: password.value,
+          role: 'defaultRole'
+        });
+        await fetchUserPermissions();
       } catch (error) {
         console.error(error);
       }
@@ -62,9 +69,23 @@ export default {
       const provider = new GoogleAuthProvider();
       try {
         await signInWithPopup(authService.auth, provider);
-        // Não redirecione o usuário imediatamente após o login
+        await fetchUserPermissions();
       } catch (error) {
         console.error(error);
+      }
+    };
+
+    const fetchUserPermissions = async () => {
+      try {
+        const token = await authService.getIdToken();
+        const response = await axios.get(`/api/v1/user/permissions/${authService.auth.currentUser.uid}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        store.dispatch('auth/setPermissions', response.data.role);
+      } catch (error) {
+        console.error('Error fetching user permissions:', error);
       }
     };
 
@@ -80,7 +101,6 @@ export default {
     // Ouça as alterações no estado de autenticação no Vuex
     watch(() => store.state.auth.isAuthenticated, (isAuthenticated) => {
       if (isAuthenticated) {
-        // O usuário está autenticado, redirecione para a página inicial
         router.push('/');
       }
     });
