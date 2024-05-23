@@ -10,6 +10,9 @@ import (
 func main() {
 	// Configura o Firestore usando a função InitFirestore
 	client := utils.InitFirestore()
+	if client == nil {
+		panic("Failed to initialize Firestore")
+	}
 	defer client.Close()
 
 	// Configura o Gin

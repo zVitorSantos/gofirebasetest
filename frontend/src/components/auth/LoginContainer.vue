@@ -36,16 +36,15 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router'; 
+import { ref, watch, getCurrentInstance } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { sendPasswordResetEmail } from "firebase/auth";
 import { authService } from '../../main';
-import { GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
-import axios from 'axios';
-axios.defaults.baseURL = 'http://localhost:8080';
 
 export default {
   setup() {
+    const { proxy } = getCurrentInstance();
     const email = ref('');
     const password = ref('');
     const router = useRouter();
@@ -53,52 +52,40 @@ export default {
 
     const loginWithEmail = async () => {
       try {
-        await authService.login(email.value, password.value);
-        await axios.post('/api/v1/user', {
-          email: email.value,
-          password: password.value,
-          role: 'defaultRole'
-        });
-        await fetchUserPermissions();
+        await store.dispatch('auth/loginWithEmail', { email: email.value, password: password.value });
+        proxy.$notify.success('Login successful!');
       } catch (error) {
-        console.error(error);
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+          proxy.$notify.error('Email ou senha incorretos.');
+        } else if (error.code === 'auth/invalid-credential') {
+          proxy.$notify.error('Credenciais inválidas.');
+        } else {
+          proxy.$notify.error('Login failed: ' + error.message);
+        }
+        console.error('Login error:', error);
       }
     };
 
     const loginWithGoogle = async () => {
-      const provider = new GoogleAuthProvider();
       try {
-        await signInWithPopup(authService.auth, provider);
-        await fetchUserPermissions();
+        await store.dispatch('auth/loginWithGoogle');
+        proxy.$notify.success('Login successful!');
       } catch (error) {
-        console.error(error);
-      }
-    };
-
-    const fetchUserPermissions = async () => {
-      try {
-        const token = await authService.getIdToken();
-        const response = await axios.get(`/api/v1/user/permissions/${authService.auth.currentUser.uid}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        store.dispatch('auth/setPermissions', response.data.role);
-      } catch (error) {
-        console.error('Error fetching user permissions:', error);
+        proxy.$notify.error('Login failed: ' + error.message);
+        console.error('Google login error:', error);
       }
     };
 
     const resetPassword = async () => {
       try {
         await sendPasswordResetEmail(authService.auth, email.value);
-        alert('Password reset email sent!');
+        proxy.$notify.info('Password reset email sent!');
       } catch (error) {
-        console.error(error);
+        proxy.$notify.error('Error sending password reset email: ' + error.message);
+        console.error('Password reset error:', error);
       }
     };
 
-    // Ouça as alterações no estado de autenticação no Vuex
     watch(() => store.state.auth.isAuthenticated, (isAuthenticated) => {
       if (isAuthenticated) {
         router.push('/');

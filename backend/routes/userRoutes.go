@@ -11,7 +11,7 @@ func RegisterUserRoutes(r *gin.RouterGroup, db *firestore.Client) {
 
 	r.POST("/user", userController.CreateUser)
 	r.GET("/user", userController.GetUsers)
-	r.GET("/user/:id", userController.GetUserByID)
+	r.GET("/user/id/:uid", userController.GetUserByUID)
 	r.PUT("/user/:id", userController.UpdateUser)
 	r.DELETE("/user/:id", userController.DeleteUser)
 	r.GET("/user/permissions/:uid", userController.GetUserPermissions)

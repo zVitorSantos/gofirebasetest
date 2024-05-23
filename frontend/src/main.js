@@ -1,14 +1,16 @@
+// main.js
 import { createApp } from 'vue';
 import './style.css';
 import App from './App.vue';
 import router from './router';
 import AuthService from './services/AuthService';
+import notificationService from './services/NotificationService';
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import { onAuthStateChanged } from 'firebase/auth';
 import store from './store';
 
-// Sua configuração do Firebase usando variáveis de ambiente do Vite
+// Configuração do Firebase usando variáveis de ambiente do Vite
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -28,9 +30,7 @@ export const authService = new AuthService(firebaseApp);
 // Se deseja usar o Firebase Analytics
 const analytics = getAnalytics(firebaseApp);
 
-// Função para inicializar o aplicativo Vue
 const initializeAppWithAuth = () => {
-    // Verifique se uma instância do aplicativo já existe
     if (window.vueApp) {
         return;
     }
@@ -38,21 +38,18 @@ const initializeAppWithAuth = () => {
     let app = createApp(App);
     app.use(router);
     app.use(store);
+    app.use(notificationService);
     app.mount('#app');
 
-    // Armazene a instância do aplicativo em uma variável global para referência futura
     window.vueApp = app;
 };
 
 // Verifique o estado de autenticação antes de montar o aplicativo
 onAuthStateChanged(authService.auth, (user) => {
     if (user) {
-        // O usuário está autenticado, atualize o estado do Vuex
         store.commit('auth/setAuth', true);
     } else {
-        // O usuário não está autenticado, limpe o estado do Vuex
         store.commit('auth/setAuth', false);
     }
-    // Inicialize o aplicativo Vue.js após verificar o estado de autenticação
     initializeAppWithAuth();
 });

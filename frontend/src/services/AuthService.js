@@ -14,8 +14,11 @@ class AuthService {
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
       return userCredential.user;
     } catch (error) {
-      console.error(error);
-      throw error;
+      if (error.code === 'auth/email-already-in-use') {
+        throw new Error('O e-mail fornecido já está em uso.');
+      } else {
+        throw error;
+      }
     }
   }
 
