@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export default {
     namespaced: true,
     state: () => ({
@@ -6,6 +8,9 @@ export default {
     mutations: {
         setProducts(state, products) {
             state.products = products;
+        },
+        addProduct(state, product) {
+            state.products.push(product);
         }
     },
     actions: {
@@ -18,14 +23,18 @@ export default {
                 throw error;
             }
         },
-        async addProduct({ dispatch }, product) {
+        async addProduct({ commit, dispatch }, product) {
             try {
                 await axios.post('/api/v1/catalog', product);
-                dispatch('fetchProducts');
+                // dispatch('fetchProducts'); // Se quiser buscar os produtos novamente após adicionar
+                commit('addProduct', product); // Adiciona o produto diretamente no estado
             } catch (error) {
                 console.error('Erro ao adicionar produto:', error);
                 throw error;
             }
         }
+    },
+    getters: {
+        products: state => state.products
     }
 };

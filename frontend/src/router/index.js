@@ -1,11 +1,9 @@
-// src/router/index.js
-
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/Home.vue';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
-import Catalog from '../views/Catalog.vue'; 
-import store from '../store'; 
+import Catalog from '../views/Catalog.vue';
+import store from '../store';
 
 const routes = [
   {
