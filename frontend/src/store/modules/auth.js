@@ -31,11 +31,20 @@ const fetchUserPermissions = async (uid) => {
   }
 };
 
+const savePermissionsToLocalStorage = (permissions) => {
+  localStorage.setItem('userPermissions', JSON.stringify(permissions));
+};
+
+const loadPermissionsFromLocalStorage = () => {
+  const permissions = localStorage.getItem('userPermissions');
+  return permissions ? JSON.parse(permissions) : [];
+};
+
 export default {
   namespaced: true,
   state: () => ({
     isAuthenticated: false,
-    userPermissions: [],
+    userPermissions: loadPermissionsFromLocalStorage(),
   }),
   mutations: {
     setAuth(state, value) {
@@ -43,6 +52,7 @@ export default {
     },
     setPermissions(state, permissions) {
       state.userPermissions = permissions;
+      savePermissionsToLocalStorage(permissions);
     },
   },
   actions: {
@@ -54,6 +64,7 @@ export default {
         await signOut(authService.auth);
         commit('setAuth', false);
         commit('setPermissions', []);
+        localStorage.removeItem('userPermissions');
       } catch (error) {
         console.error(error);
       }
@@ -70,7 +81,7 @@ export default {
         throw error;
       }
     },
-    async registerWithEmail({ commit }, { name, email, password }) {
+    async registerWithEmail({ commit }, { name, email, password, role }) {
       try {
         const userCredential = await authService.register(email, password);
         const userUID = userCredential.uid;
@@ -79,7 +90,7 @@ export default {
           email,
           password,
           uid: userUID,
-          role: 'user' // Define a role padrão como 'user'
+          role: role || 'user'
         });
         const user = response.data;
         const permissions = await fetchUserPermissions(userUID);
@@ -114,5 +125,6 @@ export default {
   getters: {
     isAuthenticated: state => state.isAuthenticated,
     userPermissions: state => state.userPermissions,
+    hasPermission: (state) => (permission) => state.userPermissions.includes(permission)
   },
 };

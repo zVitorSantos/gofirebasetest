@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	"cloud.google.com/go/firestore"
@@ -23,11 +24,15 @@ func NewCatalogController(db *firestore.Client) *CatalogController {
 func (cc *CatalogController) CreateProduct(ctx *gin.Context) {
 	var request models.CreateProductRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
+		log.Printf("Error binding JSON: %v", err)
 		utils.SendError(ctx, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
+	log.Printf("CreateProductRequest received: %+v", request)
+
 	if err := request.Validate(); err != nil {
+		log.Printf("Validation error: %v", err)
 		utils.SendError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -52,6 +57,7 @@ func (cc *CatalogController) CreateProduct(ctx *gin.Context) {
 	}
 
 	if err := cc.service.CreateProduct(&product); err != nil {
+		log.Printf("Error creating product: %v", err)
 		utils.SendError(ctx, http.StatusInternalServerError, "Error creating product")
 		return
 	}
@@ -110,4 +116,14 @@ func (cc *CatalogController) DeleteProduct(ctx *gin.Context) {
 		return
 	}
 	utils.SendSuccess(ctx, "Product deleted successfully", nil)
+}
+
+func (cc *CatalogController) GetCatalogSettings(ctx *gin.Context) {
+	settings, err := cc.service.GetCatalogSettings()
+	if err != nil {
+		log.Printf("Error fetching catalog settings: %v", err)
+		utils.SendError(ctx, http.StatusInternalServerError, "Error fetching catalog settings")
+		return
+	}
+	utils.SendSuccess(ctx, "Catalog settings fetched successfully", settings)
 }

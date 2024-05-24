@@ -29,29 +29,28 @@ func NewAuthService() *AuthService {
 }
 
 func (s *AuthService) RegisterUser(email string, password string, role string) (*auth.UserRecord, error) {
-	params := (&auth.UserToCreate{}).
-		Email(email).
-		Password(password)
+    params := (&auth.UserToCreate{}).
+        Email(email).
+        Password(password)
 
-	userRecord, err := s.client.CreateUser(context.Background(), params)
-	if err != nil {
-		return nil, err
-	}
+    userRecord, err := s.client.CreateUser(context.Background(), params)
+    if err != nil {
+        return nil, err
+    }
 
-	// Set custom token claims
-	claims := map[string]interface{}{"role": role}
-	err = s.client.SetCustomUserClaims(context.Background(), userRecord.UID, claims)
-	if err != nil {
-		return nil, err
-	}
+    // Set custom token claims
+    claims := map[string]interface{}{"role": role}
+    err = s.client.SetCustomUserClaims(context.Background(), userRecord.UID, claims)
+    if err != nil {
+        return nil, err
+    }
 
-	return userRecord, nil
+    return userRecord, nil
 }
 
 func (s *AuthService) GetUserByEmail(email string) (*auth.UserRecord, error) {
 	userRecord, err := s.client.GetUserByEmail(context.Background(), email)
 	if err != nil {
-		// Firebase returns an error with the message "user not found" if the user does not exist
 		if err.Error() == "user not found" {
 			return nil, errors.New("user not found")
 		}

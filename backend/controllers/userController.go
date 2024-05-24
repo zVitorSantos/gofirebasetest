@@ -58,7 +58,10 @@ func (uc *UserController) GetUserByUID(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
-	ctx.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, gin.H{
+		"user": user,
+		"permissions": user.Permissions,
+	})
 }
 
 func (uc *UserController) GetUsers(ctx *gin.Context) {
@@ -71,13 +74,13 @@ func (uc *UserController) GetUsers(ctx *gin.Context) {
 }
 
 func (uc *UserController) GetUserPermissions(ctx *gin.Context) {
-	uid := ctx.Param("uid")
-	role, err := uc.userService.GetUserPermissions(uid)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user permissions"})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"permissions": role})
+    uid := ctx.Param("uid")
+    permissions, err := uc.userService.GetUserPermissions(uid)
+    if err != nil {
+        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user permissions"})
+        return
+    }
+    ctx.JSON(http.StatusOK, gin.H{"permissions": permissions})
 }
 
 func (uc *UserController) UpdateUser(ctx *gin.Context) {

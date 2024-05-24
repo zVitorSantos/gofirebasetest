@@ -75,7 +75,7 @@ func (s *UserService) defaultPermissions(role string) []string {
 	case "employee":
 		return []string{"add_item", "edit_item", "delete_item", "view_all_categories"}
 	case "user":
-		return []string{"view_specific_category:cat1", "view_specific_category:cat2"}
+		return []string{"view_type:cat1", "view_type:cat2"}
 	default:
 		return []string{}
 	}
@@ -136,12 +136,12 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (s *UserService) GetUserPermissions(uid string) (string, error) {
+func (s *UserService) GetUserPermissions(uid string) ([]string, error) {
     user, err := s.GetUserByUID(uid)
     if err != nil {
-        return "", err
+        return nil, err
     }
-    return user.Role, nil
+    return user.Permissions, nil
 }
 
 func (s *UserService) UpdateUser(userID int, request *models.UpdateUserRequest) error {

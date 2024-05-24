@@ -14,4 +14,7 @@ func RegisterCatalogRoutes(r *gin.RouterGroup, db *firestore.Client) {
 	r.GET("/catalog/:id", catalogController.GetProductByID)
 	r.PUT("/catalog/:id", catalogController.UpdateProduct)
 	r.DELETE("/catalog/:id", catalogController.DeleteProduct)
+
+	// Rota para configurações de catálogo
+	r.GET("/catalog/settings", catalogController.GetCatalogSettings)
 }

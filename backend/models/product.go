@@ -3,7 +3,6 @@ package models
 import "errors"
 
 type Product struct {
-	ID           string  `json:"id" firestore:"id"`
 	Ref          string  `json:"ref" firestore:"ref"`
 	Imagem       string  `json:"imagem" firestore:"imagem"`
 	Descricao    string  `json:"descricao" firestore:"descricao"`
@@ -24,26 +23,26 @@ type Product struct {
 
 type CreateProductRequest struct {
 	Ref          string  `json:"ref" binding:"required"`
-	Imagem       string  `json:"imagem" binding:"required"`
 	Descricao    string  `json:"descricao" binding:"required"`
 	Tipo         string  `json:"tipo" binding:"required"`
-	Modelo       string  `json:"modelo" binding:"required"`
-	Formato      string  `json:"formato" binding:"required"`
+	Imagem       string  `json:"imagem"`
+	Modelo       string  `json:"modelo"`
+	Formato      string  `json:"formato"`
 	Complementos string  `json:"complementos"`
 	Material     string  `json:"material"`
-	Peso         float64 `json:"peso" binding:"required"`
-	Altura       float64 `json:"altura" binding:"required"`
-	Largura      float64 `json:"largura" binding:"required"`
-	Comprimento  float64 `json:"comprimento" binding:"required"`
-	Valor        float64 `json:"valor" binding:"required"`
-	Matriz       *string `json:"matriz" binding:"required"`
-	Piloto       *string `json:"piloto" binding:"required"`
-	Desenho      *string `json:"desenho" binding:"required"`
+	Peso         float64 `json:"peso"`
+	Altura       float64 `json:"altura"`
+	Largura      float64 `json:"largura"`
+	Comprimento  float64 `json:"comprimento"`
+	Valor        float64 `json:"valor"`
+	Matriz       *string `json:"matriz"`
+	Piloto       *string `json:"piloto"`
+	Desenho      *string `json:"desenho"`
 }
 
 func (r *CreateProductRequest) Validate() error {
-	if r.Ref == "" || r.Imagem == "" || r.Descricao == "" || r.Tipo == "" || r.Modelo == "" || r.Formato == "" || r.Peso == 0 || r.Altura == 0 || r.Largura == 0 || r.Comprimento == 0 || r.Valor == 0 || r.Matriz == nil || r.Piloto == nil || r.Desenho == nil {
-		return errors.New("missing required fields")
+	if r.Ref == "" || r.Descricao == "" || r.Tipo == "" {
+		return errors.New("ref, descricao, and tipo are required fields")
 	}
 	return nil
 }
