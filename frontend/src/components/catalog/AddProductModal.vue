@@ -45,12 +45,14 @@
             </div>
             <div class="form-group">
               <select id="formato" v-model="newProduct.formato">
-                <option v-for="formato in catalogSettings.formats" :key="formato" :value="formato">{{ formato }}</option>
+                <option v-for="formato in catalogSettings.formats" :key="formato" :value="formato">{{ formato }}
+                </option>
               </select>
             </div>
             <div class="form-group">
               <select id="complementos" v-model="newProduct.complementos">
-                <option v-for="complemento in catalogSettings.complements" :key="complemento" :value="complemento">{{ complemento }}</option>
+                <option v-for="complemento in catalogSettings.complements" :key="complemento" :value="complemento">{{
+    complemento }}</option>
               </select>
             </div>
             <div class="form-group">
@@ -91,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, getCurrentInstance } from 'vue';
 import { useStore } from 'vuex';
 
 const props = defineProps({
@@ -99,8 +101,9 @@ const props = defineProps({
   onClose: Function,
 });
 
+const { proxy } = getCurrentInstance();
 const store = useStore();
-const catalogSettings = computed(() => store.getters['catalogSettings/catalogSettings']);
+const catalogSettings = computed(() => store.getters['catalog/catalogSettings']);
 const canEditTipo = computed(() => store.getters['auth/hasPermission']('edit_type'));
 
 const newProduct = ref({
@@ -149,8 +152,12 @@ const submitForm = async () => {
     await store.dispatch('catalog/addProduct', newProduct.value);
     resetForm();
     props.onClose();
+    proxy.$notify.success('Produto adicionado com sucesso!');
   } catch (error) {
-    console.error('Erro ao adicionar produto:', error);
+
+    
+    proxy.$notify.error(error.response.data.error);
+    console.error(error);
   }
 };
 
@@ -182,7 +189,7 @@ const closeModal = () => {
 
 onMounted(async () => {
   if (!catalogSettings.value) {
-    await store.dispatch('catalogSettings/fetchCatalogSettings');
+    await store.dispatch('catalog/fetchCatalogSettings');
   }
 });
 </script>

@@ -58,7 +58,11 @@ func (cc *CatalogController) CreateProduct(ctx *gin.Context) {
 
 	if err := cc.service.CreateProduct(&product); err != nil {
 		log.Printf("Error creating product: %v", err)
-		utils.SendError(ctx, http.StatusInternalServerError, "Error creating product")
+		if err.Error() == "product with the given ref already exists" {
+			utils.SendError(ctx, http.StatusBadRequest, "Produto com essa referência já existe.")
+		} else {
+			utils.SendError(ctx, http.StatusInternalServerError, "Error creating product")
+		}
 		return
 	}
 
