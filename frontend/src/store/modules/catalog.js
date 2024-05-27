@@ -15,9 +15,10 @@ export default {
     },
   },
   actions: {
-    async fetchProducts({ commit }) {
+    async fetchProducts({ commit }, token) {
       try {
-        const response = await axios.get('/api/v1/catalog');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await axios.get('/api/v1/catalog', { headers });
         console.log('Fetched products:', response.data.data);
         commit('setProducts', response.data.data || []);
       } catch (error) {
@@ -25,23 +26,24 @@ export default {
         throw error;
       }
     },
-    async addProduct({ dispatch }) {
+    async addProduct({ dispatch, rootState }, product) {
       try {
-        await axios.post('/api/v1/catalog', product);
+        const token = await rootState.auth.user.getIdToken();
+        await axios.post('/api/v1/catalog', product, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         dispatch('fetchProducts');
       } catch (error) {
-        if (error.response && error.response.data && error.response.data.error === 'Produto com essa referência já existe.') {
-          this._vm.$notify.error('Produto com essa referência já existe.');
-        } else {
-          console.error('Erro ao adicionar produto:', error);
-          this._vm.$notify.error('Erro ao adicionar produto.');
-          throw error;
-        }
+        console.error('Erro ao adicionar produto:', error);
+        throw error;
       }
     },
-    async fetchCatalogSettings({ commit }) {
+    async fetchCatalogSettings({ commit }, token) {
       try {
-        const response = await axios.get('/api/v1/catalog/settings');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await axios.get('/api/v1/catalog/settings', { headers });
         commit('setCatalogSettings', response.data.data);
       } catch (error) {
         console.error('Erro ao buscar configurações do catálogo:', error);

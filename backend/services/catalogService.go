@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"sort"
 
 	"cloud.google.com/go/firestore"
 	"github.com/zVitorSantos/gofirebasetest.git/models"
@@ -40,7 +41,7 @@ func (s *CatalogService) CreateProduct(product *models.Product) error {
 	return err
 }
 
-func (s *CatalogService) GetProducts() ([]models.Product, error) {
+func (s *CatalogService) GetAllProducts() ([]models.Product, error) {
 	ctx := context.Background()
 	iter := s.db.Collection("products").Documents(ctx)
 	var products []models.Product
@@ -62,10 +63,45 @@ func (s *CatalogService) GetProducts() ([]models.Product, error) {
 		products = append(products, product)
 	}
 
-	log.Printf("Fetched products: %+v", products)
+	// Ordenar os produtos pelo valor antes de retornar
+	sort.Slice(products, func(i, j int) bool {
+		return products[i].Valor < products[j].Valor
+	})
+
 	return products, nil
 }
 
+func (s *CatalogService) GetProductsByTypes(types []string) ([]models.Product, error) {
+	ctx := context.Background()
+	iter := s.db.Collection("products").Where("tipo", "in", types).Documents(ctx)
+	var products []models.Product
+
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("Error fetching products: %v", err)
+			return nil, err
+		}
+		var product models.Product
+		if err := doc.DataTo(&product); err != nil {
+			log.Printf("Error mapping Firestore document to struct: %v", err)
+			return nil, err
+		}
+		products = append(products, product)
+	}
+
+	// Ordenar os produtos pelo valor antes de retornar
+	sort.Slice(products, func(i, j int) bool {
+		return products[i].Valor < products[j].Valor
+	})
+
+	return products, nil
+}
+
+// Os outros métodos permanecem inalterados
 func (s *CatalogService) GetProductByID(id string) (*models.Product, error) {
 	ctx := context.Background()
 	doc, err := s.db.Collection("products").Doc(id).Get(ctx)

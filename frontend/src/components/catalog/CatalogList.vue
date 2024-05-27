@@ -2,8 +2,12 @@
   <div class="catalog-page">
     <Navbar />
     <div class="toggle-buttons">
-      <button @click="toggleView('cards')">Cards View</button>
-      <button @click="toggleView('list')">List View</button>
+      <a href="#" @click.prevent="toggleView('cards')" id="grid-view" title="Visualização em grade" :class="{ active: currentView === 'cards' }" class="btn btn-light">
+        <i class="icon-grid" aria-hidden="true"></i>
+      </a>
+      <a href="#" @click.prevent="toggleView('list')" id="list-view" title="Visualização em lista" :class="{ active: currentView === 'list' }" class="btn btn-light">
+        <i class="icon-list" aria-hidden="true"></i>
+      </a>
     </div>
     <div class="catalog-container"
       :class="{ 'list-view': currentView === 'list', 'cards-view': currentView === 'cards' }">
@@ -11,115 +15,16 @@
       <div v-if="fetchError">Erro ao carregar produtos.</div>
       <div v-else>
         <div v-if="filteredProducts.length === 0">Nenhum produto encontrado.</div>
-        <div v-else>
-          <div v-for="product in filteredProducts" :key="product.ref" class="catalog-item">
-            <div v-if="currentView === 'list'" class="item">
-              <div class="image-column">
-                <img class="item-image" :src="product.imagem || 'https://via.placeholder.com/100'"
-                  alt="Imagem do item" />
-              </div>
-              <div class="info-column">
-                <div class="info-block">
-                  <strong>Ref:</strong>
-                  <p>{{ product.ref || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Descrição:</strong>
-                  <p>{{ product.descricao || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Valor:</strong>
-                  <p>{{ product.valor ? 'R$ ' + product.valor : 'N/A' }}</p>
-                </div>
-              </div>
-              <div class="info-column">
-                <div class="info-block">
-                  <strong>Categoria 1:</strong>
-                  <p>{{ product.categoria_1 || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Categoria 2:</strong>
-                  <p>{{ product.categoria_2 || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Categoria 3:</strong>
-                  <p>{{ product.categoria_3 || 'N/A' }}</p>
-                </div>
-              </div>
-              <div class="info-column">
-                <div class="info-block">
-                  <strong>Complementos:</strong>
-                  <p>{{ product.complementos || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Material:</strong>
-                  <p>{{ product.material || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Peso:</strong>
-                  <p>{{ product.peso || 'N/A' }}</p>
-                </div>
-              </div>
-              <div class="info-column">
-                <div class="info-block">
-                  <strong>Altura:</strong>
-                  <p>{{ product.altura || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Largura:</strong>
-                  <p>{{ product.largura || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Comprimento:</strong>
-                  <p>{{ product.comprimento || 'N/A' }}</p>
-                </div>
-              </div>
-              <div class="info-column">
-                <div class="info-block">
-                  <strong>Matriz:</strong>
-                  <p>{{ product.matriz ? 'Sim' : 'Não' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Piloto:</strong>
-                  <p>{{ product.piloto ? 'Sim' : 'Não' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Desenho:</strong>
-                  <p>{{ product.desenho ? 'Sim' : 'Não' }}</p>
-                </div>
-              </div>
-            </div>
-            <div v-if="currentView === 'cards'" class="card">
-              <div class="image-column">
-                <img class="item-image" :src="product.imagem || 'https://via.placeholder.com/100'"
-                  alt="Imagem do item" />
-              </div>
-              <div class="info-column">
-                <div class="info-block">
-                  <strong>Ref:</strong>
-                  <p>{{ product.ref || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Medidas:</strong>
-                  <p>{{ product.altura || 'N/A' }} x {{ product.largura || 'N/A' }} x {{ product.comprimento || 'N/A' }}
-                  </p>
-                </div>
-                <div class="info-block">
-                  <strong>Peso:</strong>
-                  <p>{{ product.peso || 'N/A' }}</p>
-                </div>
-                <div class="info-block">
-                  <strong>Valor:</strong>
-                  <p>{{ product.valor ? 'R$ ' + product.valor : 'N/A' }}</p>
-                </div>
-              </div>
-            </div>
+        <div class="products-list">
+          <div v-for="product in filteredProducts" :key="product.ref">
+            <ItemCard v-if="currentView === 'cards'" :product="product" />
+            <ItemColumn v-else :product="product" />
           </div>
         </div>
       </div>
     </div>
     <div v-if="canAddProduct">
-      <button @click="showModal = true">Adicionar Produto</button>
+      <button @click="showModal = true" class="btn btn-primary mt-3">Adicionar Produto</button>
       <AddProductModal :show="showModal" @close="showModal = false" />
     </div>
   </div>
@@ -130,27 +35,56 @@ import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import Navbar from '../common/NavBar.vue';
 import AddProductModal from './AddProductModal.vue';
+import ItemCard from './ItemCard.vue';
+import ItemColumn from './ItemColumn.vue';
+import { authService } from '../../main';
 
 const store = useStore();
 const isAuthenticated = computed(() => store.getters['auth/isAuthenticated']);
 const products = computed(() => store.getters['catalog/products']);
+const userPermissions = computed(() => store.state.auth.user?.permissions || []);
 const canAddProduct = computed(() => store.getters['auth/hasPermission']('add_item'));
 const currentView = ref('cards');
 const showModal = ref(false);
 const fetchError = ref(false);
 
-// Filtra os produtos com base na autenticação do usuário
+// Filtra os produtos com base na autenticação do usuário e suas permissões
 const filteredProducts = computed(() => {
+  const defaultTypes = ['Enfeite', 'Enfeite Montado'];
+
   if (!isAuthenticated.value) {
-    return products.value.filter(product => product.tipo === 'Enfeite' || product.tipo === 'Enfeite Montado');
+    return products.value.filter(product => defaultTypes.includes(product.tipo));
   }
-  return products.value;
+
+  const hasViewAllTypesPermission = userPermissions.value.includes('view_all_types');
+  if (hasViewAllTypesPermission) {
+    return products.value;
+  }
+
+  const viewableTypes = userPermissions.value
+    .filter(permission => permission.startsWith('view_type:'))
+    .map(permission => permission.split(':')[1])
+    .concat(defaultTypes);
+
+  return products.value.filter(product => viewableTypes.includes(product.tipo));
 });
 
 const fetchProducts = async () => {
   try {
-    await store.dispatch('catalog/fetchProducts');
-    await store.dispatch('catalog/fetchCatalogSettings');
+    if (isAuthenticated.value) {
+      const user = authService.auth.currentUser;
+      if (user) {
+        const token = await user.getIdToken();
+        await store.dispatch('catalog/fetchProducts', token);
+        await store.dispatch('catalog/fetchCatalogSettings', token);
+      } else {
+        fetchError.value = true;
+        console.error('Erro ao obter token de autenticação.');
+      }
+    } else {
+      await store.dispatch('catalog/fetchProducts', null);
+      await store.dispatch('catalog/fetchCatalogSettings', null);
+    }
   } catch (error) {
     fetchError.value = true;
     console.error('Erro ao buscar produtos:', error);
@@ -168,7 +102,6 @@ onMounted(fetchProducts);
 .catalog-page {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   height: 100%;
 }
@@ -180,10 +113,23 @@ onMounted(fetchProducts);
 }
 
 .catalog-container {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.products-list {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   justify-content: center;
+}
+
+.catalog-container.list-view .products-list {
+  flex-direction: column;
+}
+
+.catalog-container.cards-view .products-list {
+  flex-direction: row;
 }
 
 .catalog-container.list-view .catalog-item {

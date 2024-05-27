@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
@@ -70,7 +71,49 @@ func (cc *CatalogController) CreateProduct(ctx *gin.Context) {
 }
 
 func (cc *CatalogController) GetProducts(ctx *gin.Context) {
-	products, err := cc.service.GetProducts()
+	user, exists := ctx.Get("user")
+	defaultTypes := []string{"Enfeite", "Enfeite Montado"}
+
+	if !exists {
+		products, err := cc.service.GetProductsByTypes(defaultTypes)
+		if err != nil {
+			utils.SendError(ctx, http.StatusInternalServerError, "Error fetching products")
+			return
+		}
+		utils.SendSuccess(ctx, "Products fetched successfully", products)
+		return
+	}
+
+	userModel, ok := user.(*models.User)
+	if !ok {
+		log.Printf("Failed to convert user context to models.User")
+		utils.SendError(ctx, http.StatusInternalServerError, "Error fetching user information")
+		return
+	}
+
+	userPermissions := userModel.Permissions
+
+	// Log de depuração para verificar as permissões do usuário
+	log.Printf("User permissions: %v", userPermissions)
+
+	if contains(userPermissions, "view_all_types") {
+		products, err := cc.service.GetAllProducts()
+		if err != nil {
+			utils.SendError(ctx, http.StatusInternalServerError, "Error fetching products")
+			return
+		}
+		utils.SendSuccess(ctx, "Products fetched successfully", products)
+		return
+	}
+
+	viewTypes := defaultTypes
+	for _, permission := range userPermissions {
+		if strings.HasPrefix(permission, "view_type:") {
+			viewTypes = append(viewTypes, strings.Split(permission, ":")[1])
+		}
+	}
+
+	products, err := cc.service.GetProductsByTypes(viewTypes)
 	if err != nil {
 		utils.SendError(ctx, http.StatusInternalServerError, "Error fetching products")
 		return
@@ -78,6 +121,17 @@ func (cc *CatalogController) GetProducts(ctx *gin.Context) {
 	utils.SendSuccess(ctx, "Products fetched successfully", products)
 }
 
+// Função auxiliar para verificar se uma lista contém um elemento
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
+
+// Os outros métodos permanecem inalterados
 func (cc *CatalogController) GetProductByID(ctx *gin.Context) {
 	id := ctx.Param("id")
 	product, err := cc.service.GetProductByID(id)

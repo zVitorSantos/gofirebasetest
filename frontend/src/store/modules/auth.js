@@ -115,12 +115,24 @@ export default {
     },
     async updateUserPermissions({ commit }, { userID, permissions }) {
       try {
-        await axios.put(`/api/v1/user/permissions/${userID}`, { permissions });
+        const token = await authService.getIdToken();
+        await axios.put(`/api/v1/user/permissions/${userID}`, { permissions }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         commit('setPermissions', permissions);
       } catch (error) {
         throw error;
       }
     },
+    async getToken() {
+      const user = authService.auth.currentUser;
+      if (user) {
+        return await user.getIdToken();
+      }
+      return null;
+    }
   },
   getters: {
     isAuthenticated: state => state.isAuthenticated,

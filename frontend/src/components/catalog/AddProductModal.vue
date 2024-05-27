@@ -45,14 +45,12 @@
             </div>
             <div class="form-group">
               <select id="formato" v-model="newProduct.formato">
-                <option v-for="formato in catalogSettings.formats" :key="formato" :value="formato">{{ formato }}
-                </option>
+                <option v-for="formato in catalogSettings.formats" :key="formato" :value="formato">{{ formato }}</option>
               </select>
             </div>
             <div class="form-group">
               <select id="complementos" v-model="newProduct.complementos">
-                <option v-for="complemento in catalogSettings.complements" :key="complemento" :value="complemento">{{
-    complemento }}</option>
+                <option v-for="complemento in catalogSettings.complements" :key="complemento" :value="complemento">{{ complemento }}</option>
               </select>
             </div>
             <div class="form-group">
@@ -154,10 +152,12 @@ const submitForm = async () => {
     props.onClose();
     proxy.$notify.success('Produto adicionado com sucesso!');
   } catch (error) {
-
-    
-    proxy.$notify.error(error.response.data.error);
-    console.error(error);
+    if (error.response && error.response.data && error.response.data.error) {
+      proxy.$notify.error(error.response.data.error);
+    } else {
+      proxy.$notify.error('Erro ao adicionar produto.');
+    }
+    console.error('Erro ao adicionar produto:', error);
   }
 };
 

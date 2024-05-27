@@ -24,6 +24,10 @@ func NewUserService(db *firestore.Client) *UserService {
 	}
 }
 
+func (s *UserService) AuthService() *AuthService {
+	return s.authService
+}
+
 func (s *UserService) CreateUser(request *models.CreateUserRequest) (*models.User, error) {
     // Tenta obter o usuário pelo email
     userRecord, err := s.authService.GetUserByEmail(request.Email)
@@ -71,9 +75,9 @@ func (s *UserService) CreateUser(request *models.CreateUserRequest) (*models.Use
 func (s *UserService) defaultPermissions(role string) []string {
 	switch role {
 	case "admin":
-		return []string{"manage_users", "add_item", "edit_item", "delete_item", "view_all_categories"}
+		return []string{"manage_users", "add_item", "edit_item", "delete_item", "view_all_types"}
 	case "employee":
-		return []string{"add_item", "edit_item", "delete_item", "view_all_categories"}
+		return []string{"add_item", "edit_item", "delete_item", "view_all_types"}
 	case "user":
 		return []string{"view_type:cat1", "view_type:cat2"}
 	default:

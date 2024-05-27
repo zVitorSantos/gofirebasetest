@@ -3,7 +3,9 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/zVitorSantos/gofirebasetest.git/middleware"
 	"github.com/zVitorSantos/gofirebasetest.git/routes"
+	"github.com/zVitorSantos/gofirebasetest.git/services"
 	"github.com/zVitorSantos/gofirebasetest.git/utils"
 )
 
@@ -14,6 +16,9 @@ func main() {
 		panic("Failed to initialize Firestore")
 	}
 	defer client.Close()
+
+	// Configura o UserService
+	userService := services.NewUserService(client)
 
 	// Configura o Gin
 	r := gin.Default()
@@ -27,6 +32,7 @@ func main() {
 
 	// Define o grupo de rotas com o prefixo /api/v1
 	api := r.Group("/api/v1")
+	api.Use(middleware.AuthMiddleware(userService))
 	{
 		routes.RegisterCatalogRoutes(api, client)
 		routes.RegisterUserRoutes(api, client)
